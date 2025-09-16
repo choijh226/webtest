@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서울대공원 가을 운동회</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Autumn Harmony -->
+    <!-- Application Structure Plan: 대시보드 스타일의 SPA로 설계하여 사용자가 행사의 핵심 정보를 빠르게 파악하고, 세부 정보는 상호작용을 통해 탐색하도록 구성했습니다. 상단 고정 내비게이션으로 각 섹션 간 이동을 용이하게 하고, 타임라인, 게임 비교 차트 등 동적 요소를 통해 사용자의 흥미를 유발하고 참여를 유도합니다. 이는 정적인 보고서 형식을 탈피하여 잠재적 참가자에게 매력적인 경험을 제공하기 위함입니다. -->
+    <!-- Visualization & Content Choices: 
+        - 행사 규모 (참가팀, 인원): Goal: Inform -> Viz: 동적 스탯 카드 -> Interaction: 없음 -> Justification: 주요 숫자를 강조하여 행사의 규모를 즉각적으로 전달.
+        - 행사 시간표: Goal: Change -> Viz: 상호작용 탭 형식의 타임라인 (HTML/CSS) -> Interaction: 탭 클릭 시 해당 시간대 세부 내용 표시 -> Justification: 시간의 흐름에 따른 프로그램 정보를 체계적으로 제공하며, 화면을 깔끔하게 유지.
+        - 팀 대항 게임 비교: Goal: Compare -> Viz: Radar Chart (Chart.js/Canvas) -> Interaction: 게임 버튼 클릭 시 차트 데이터셋 토글 -> Justification: 여러 게임의 특성(팀워크, 스피드 등)을 다차원적으로 비교하여 사용자의 게임 선택 및 이해를 도움.
+        - 예산 및 인력 구성: Goal: Inform -> Viz: Donut Charts (Chart.js/Canvas) -> Interaction: 차트 섹션 호버 시 툴팁 표시 -> Justification: 전체에서 각 항목이 차지하는 비율을 시각적으로 명확하게 보여줌.
+        - 안전 계획: Goal: Inform -> Viz: 아이콘을 곁들인 목록 (HTML/CSS) -> Interaction: 없음 -> Justification: 중요한 안전 정보를 빠르고 쉽게 인지할 수 있도록 구성. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .nav-link.active {
+            color: #D97706;
+            border-bottom-color: #D97706;
+        }
+    </style>
+</head>
+<body class="bg-amber-50">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#" class="text-xl font-bold text-amber-900">서울대공원 가을 운동회</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#overview" class="nav-link text-gray-600 hover:text-amber-700 border-b-2 border-transparent pb-1">행사 개요</a>
+                    <a href="#schedule" class="nav-link text-gray-600 hover:text-amber-700 border-b-2 border-transparent pb-1">세부 프로그램</a>
+                    <a href="#games" class="nav-link text-gray-600 hover:text-amber-700 border-b-2 border-transparent pb-1">팀 대항 게임</a>
+                    <a href="#info" class="nav-link text-gray-600 hover:text-amber-700 border-b-2 border-transparent pb-1">운영 안내</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        
+        <section class="text-center py-20">
+            <h1 class="text-5xl md:text-6xl font-black text-amber-900 leading-tight">시민과 함께하는<br>서울대공원 가을 운동회</h1>
+            <p class="mt-4 text-lg text-gray-700">2025년 11월 5일, 서울대공원 잔디광장에서 잊지 못할 추억을 만들어보세요!</p>
+            <div class="mt-8 text-xl font-bold text-amber-800">
+                <span>📅 2025. 11. 5. (수) 14:00 ~ 17:00</span>
+                <span class="mx-2">|</span>
+                <span>📍 서울대공원 잔디광장</span>
+            </div>
+        </section>
+
+        <section id="overview" class="py-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-8 rounded-xl shadow-lg transition-transform transform hover:scale-105">
+                    <div class="text-6xl font-bold text-orange-500">100</div>
+                    <p class="mt-2 text-xl font-semibold text-gray-800">참가팀</p>
+                    <p class="text-gray-600">(팀당 4인 기준)</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg transition-transform transform hover:scale-105">
+                    <div class="text-6xl font-bold text-lime-600">400</div>
+                    <p class="mt-2 text-xl font-semibold text-gray-800">총 참가인원</p>
+                    <p class="text-gray-600">(선착순 사전 신청)</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg transition-transform transform hover:scale-105">
+                    <div class="text-6xl font-bold text-sky-600">3</div>
+                    <p class="mt-2 text-xl font-semibold text-gray-800">총 행사시간</p>
+                    <p class="text-gray-600">(14:00 ~ 17:00)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="schedule" class="py-16">
+            <h2 class="text-4xl font-bold text-center text-amber-900 mb-12">시간대별 프로그램</h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="flex border-b">
+                    <button data-tab="tab1" class="tab-btn flex-1 py-4 px-2 text-center font-semibold text-gray-700 bg-amber-200 rounded-t-lg border-b-4 border-amber-600">14:00 ~ 14:20</button>
+                    <button data-tab="tab2" class="tab-btn flex-1 py-4 px-2 text-center font-semibold text-gray-500 bg-gray-100 rounded-t-lg">14:20 ~ 16:30</button>
+                    <button data-tab="tab3" class="tab-btn flex-1 py-4 px-2 text-center font-semibold text-gray-500 bg-gray-100 rounded-t-lg">16:30 ~ 17:00</button>
+                </div>
+                <div class="bg-white shadow-lg rounded-b-lg p-8">
+                    <div id="tab1" class="tab-content">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-4">개회 및 몸풀기</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>참가자 등록 및 명찰 배부</li>
+                            <li>개회 선언 및 축하 공연 (마술쇼/버블쇼)</li>
+                            <li>다함께 즐기는 준비 체조</li>
+                        </ul>
+                    </div>
+                    <div id="tab2" class="tab-content hidden">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-4">흥미진진! 팀 대항 게임</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>협동 제기차기 (30분)</li>
+                            <li>공굴리기 릴레이 (30분)</li>
+                            <li>장애물 달리기 (30분)</li>
+                            <li>팀 줄다리기 (30분)</li>
+                        </ul>
+                    </div>
+                    <div id="tab3" class="tab-content hidden">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-4">시상식 및 폐회</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>팀별 점수 집계 및 최종 순위 발표</li>
+                            <li>우승팀 시상 및 기념품 증정</li>
+                            <li>행운의 경품 추첨</li>
+                            <li>폐회 선언 및 단체 기념 사진 촬영</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="games" class="py-16 bg-white rounded-2xl shadow-xl">
+             <h2 class="text-4xl font-bold text-center text-amber-900 mb-4">어떤 게임에 자신있나요?</h2>
+             <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">각 게임은 팀워크, 스피드, 힘, 재미 등 다양한 요소를 필요로 합니다. 아래 버튼을 클릭하여 게임별 특징을 비교해보세요!</p>
+             <div class="chart-container">
+                <canvas id="gamesRadarChart"></canvas>
+            </div>
+            <div id="game-buttons" class="flex justify-center flex-wrap gap-3 mt-8">
+                <button data-game="0" class="game-btn bg-orange-500 text-white px-4 py-2 rounded-full font-semibold">협동 제기차기</button>
+                <button data-game="1" class="game-btn bg-lime-600 text-white px-4 py-2 rounded-full font-semibold">공굴리기 릴레이</button>
+                <button data-game="2" class="game-btn bg-sky-600 text-white px-4 py-2 rounded-full font-semibold">장애물 달리기</button>
+                <button data-game="3" class="game-btn bg-red-500 text-white px-4 py-2 rounded-full font-semibold">팀 줄다리기</button>
+            </div>
+        </section>
+
+        <section id="info" class="py-16">
+            <h2 class="text-4xl font-bold text-center text-amber-900 mb-12">안심하고 즐기는 운동회</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-center text-amber-800 mb-6">든든한 운영 계획</h3>
+                    <div class="chart-container h-64 md:h-72">
+                        <canvas id="budgetDonutChart"></canvas>
+                    </div>
+                     <p class="text-center mt-4 text-gray-600">체계적인 예산 분배로 알찬 프로그램을 구성했습니다.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-center text-amber-800 mb-6">철저한 안전 관리</h3>
+                     <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-4">🛡️</span>
+                            <div>
+                                <h4 class="font-bold text-gray-800">안전 요원 배치</h4>
+                                <p class="text-gray-600">행사장 곳곳에 전문 안전 요원을 배치하여 질서와 안전을 유지합니다.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-4">➕</span>
+                            <div>
+                                <h4 class="font-bold text-gray-800">의료 부스 운영</h4>
+                                <p class="text-gray-600">응급 상황에 대비해 의료진이 상주하며 구급약품을 비치합니다.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl mr-4">🌦️</span>
+                            <div>
+                                <h4 class="font-bold text-gray-800">우천 시 대책 마련</h4>
+                                <p class="text-gray-600">가벼운 비에도 대비책을 마련하여 행사가 원활히 진행되도록 합니다.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-amber-800 text-white text-center py-6">
+        <p>주최/주관: 서울대공원 기획홍보과 | 후원: 서울특별시</p>
+        <p class="text-sm mt-2 opacity-75">본 페이지는 '서울대공원 가을 운동회' 안내를 위해 제작되었습니다.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const tooltipTitleCallback = {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            const colors = {
+                orange: 'rgba(249, 115, 22, 0.7)',
+                lime: 'rgba(101, 163, 13, 0.7)',
+                sky: 'rgba(2, 132, 199, 0.7)',
+                red: 'rgba(239, 68, 68, 0.7)',
+                borderOrange: 'rgb(249, 115, 22)',
+                borderLime: 'rgb(101, 163, 13)',
+                borderSky: 'rgb(2, 132, 199)',
+                borderRed: 'rgb(239, 68, 68)',
+            };
+
+            const radarData = {
+                labels: ['팀워크', '스피드', '힘', '재미'],
+                datasets: [{
+                    label: '협동 제기차기',
+                    data: [5, 2, 1, 4],
+                    backgroundColor: colors.orange,
+                    borderColor: colors.borderOrange,
+                    pointBackgroundColor: colors.borderOrange,
+                    pointBorderColor: '#fff',
+                }, {
+                    label: '공굴리기 릴레이',
+                    data: [4, 4, 2, 4],
+                    backgroundColor: colors.lime,
+                    borderColor: colors.borderLime,
+                    pointBackgroundColor: colors.borderLime,
+                    pointBorderColor: '#fff',
+                }, {
+                    label: '장애물 달리기',
+                    data: [2, 5, 3, 5],
+                    backgroundColor: colors.sky,
+                    borderColor: colors.borderSky,
+                    pointBackgroundColor: colors.borderSky,
+                    pointBorderColor: '#fff',
+                }, {
+                    label: '팀 줄다리기',
+                    data: [5, 1, 5, 3],
+                    backgroundColor: colors.red,
+                    borderColor: colors.borderRed,
+                    pointBackgroundColor: colors.borderRed,
+                    pointBorderColor: '#fff',
+                }]
+            };
+
+            const radarCtx = document.getElementById('gamesRadarChart').getContext('2d');
+            const gamesRadarChart = new Chart(radarCtx, {
+                type: 'radar',
+                data: radarData,
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 14, weight: 'bold' } },
+                            suggestedMin: 0,
+                            suggestedMax: 5,
+                            ticks: { stepSize: 1, display: false }
+                        }
+                    },
+                    elements: {
+                      line: {
+                        borderWidth: 2
+                      }
+                    },
+                    ...tooltipTitleCallback
+                }
+            });
+
+            document.querySelectorAll('.game-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const gameIndex = parseInt(button.dataset.game);
+                    const isVisible = gamesRadarChart.isDatasetVisible(gameIndex);
+                    gamesRadarChart.setDatasetVisibility(gameIndex, !isVisible);
+                    gamesRadarChart.update();
+                    button.classList.toggle('opacity-50', isVisible);
+                });
+            });
+
+            const budgetCtx = document.getElementById('budgetDonutChart').getContext('2d');
+            new Chart(budgetCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['게임 용품 (40%)', '경품/기념품 (30%)', '인력 (15%)', '홍보/기타 (15%)'],
+                    datasets: [{
+                        data: [40, 30, 15, 15],
+                        backgroundColor: [colors.borderOrange, colors.borderLime, colors.borderSky, colors.borderRed],
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        ...tooltipTitleCallback.plugins,
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('bg-amber-200', 'text-gray-700', 'border-amber-600', 'border-b-4');
+                        btn.classList.add('bg-gray-100', 'text-gray-500');
+                    });
+                    button.classList.add('bg-amber-200', 'text-gray-700', 'border-amber-600', 'border-b-4');
+                    button.classList.remove('bg-gray-100', 'text-gray-500');
+
+                    tabContents.forEach(content => {
+                        if (content.id === targetTab) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+
+            sections.forEach(section => {
+                if (section.id) {
+                    observer.observe(section);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
